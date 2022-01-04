@@ -1,0 +1,25 @@
+
+#root {
+    min-width: 100vw;
+}
+#scaterGraph{
+    border: 1px solid rgb(207, 207, 207);
+    border-radius: 10px;
+    box-shadow: 0px 0px 10px rgb(153, 153, 153);
+}
+#title {
+    margin-top: 1ch;
+    text-align: center;
+}
+.bar {
+    fill:royalblue;
+}
+.bar:hover {
+    fill: red;
+}
+#tooltip {
+    background-color: white;
+    width: 100px;
+    border-radius: 5px;
+    box-shadow: 0px 5px 10px rgba(44, 72, 173, 0.5);
+}
