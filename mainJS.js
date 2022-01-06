@@ -54,7 +54,40 @@ document.addEventListener("DOMContentLoaded", function(){
                      .append("circle")
                      .attr("cx", (data)=>xScale(rawYearVariable(data)))
                      .attr("cy", (data)=>yScale(rawTimeVariable(data)))
-                     .attr("r", 5);
+                     .attr("r", 5)
+              /*Set element class*/
+                     .attr("class", "dot")
+
+              /*Append data as properties*/
+                     .attr("data-xvalue", (data)=>rawYearVariable(data))
+                     .attr("data-yvalue", (data)=>data["Time"])
+                     .attr("data-name", (data)=>data["Name"])
+                     
+              /*Setting up tooltip in a way so it passes the freeCodeCamp tooltip test*/
+                     .on("mouseover", (pelesEvent)=>{
+
+                            /*DEBUG*/
+                            console.log(Math.round(parseFloat(pelesEvent.target.attributes.getNamedItem("cy").nodeValue)));
+
+                            toolTip
+                                   .transition()
+                                   .duration(100)
+                                   .style("opacity", 0.9);
+
+                            toolTip
+                                   .html("Name: " + pelesEvent.target.attributes.getNamedItem("data-name").nodeValue + "\nTime: " + pelesEvent.target.attributes.getNamedItem("data-yvalue").nodeValue)
+                                   /*tooltip positioning by getting data from mouseover event target*/
+                                   .style("margin-left", pelesEvent.layerX - 20 + "px")
+                                   .style("Top",  Math.round(parseFloat(pelesEvent.target.attributes.getNamedItem("cy").nodeValue) - 50) + "px");
+
+                                   toolTip.attr("data-date", pelesEvent.target.__data__[0]);
+                     })
+                     .on("mouseout", (pelesEvent)=>{
+                            toolTip
+                                   .transition()
+                                   .duration(100)
+                                   .style("opacity", 0);
+                     });
 
 
               /*DEBUG*/
