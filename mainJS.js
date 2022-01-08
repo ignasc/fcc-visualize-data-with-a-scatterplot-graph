@@ -15,6 +15,9 @@ document.addEventListener("DOMContentLoaded", function(){
               const chartHeight = 500;
               const pageWidth  = document.documentElement.scrollWidth;
               const padding = 60;
+              /*Colors for automated styling*/
+              const dopingPresentColor = "red";
+              const dopingAbsentColor = "blue";
               /*Functions to pickup the right data from array of objects*/
               const rawYearVariable = (element)=>{return element["Year"]};
               const rawTimeVariable = (element)=>{return element["Seconds"]};
@@ -27,12 +30,13 @@ document.addEventListener("DOMContentLoaded", function(){
 
 
               /*Generate SVG bar chart axis scales*/
+              /*note: -1 and +1 are to push data away from the edges (there is no data for min year -1 and max year +1*/
               const xScale = d3.scaleLinear()
-                     .domain([d3.min(jsonDATA, (data)=>data["Year"]), d3.max(jsonDATA, (data)=>data["Year"])])
+                     .domain([d3.min(jsonDATA, (data)=>data["Year"])-1, d3.max(jsonDATA, (data)=>data["Year"])+1])
                      .range([padding, chartWidth - padding]);
               
               const yScale = d3.scaleLinear()
-                     .domain([d3.max(jsonDATA, (data)=>data["Seconds"]), d3.min(jsonDATA, (data)=>data["Seconds"])])
+                     .domain([d3.max(jsonDATA, (data)=>data["Seconds"]), d3.min(jsonDATA, (data)=>data["Seconds"])-10])
                      .range([chartHeight - padding, padding]);
     
               /*Create blank SVG element*/
@@ -57,6 +61,8 @@ document.addEventListener("DOMContentLoaded", function(){
                      .attr("r", 5)
               /*Set element class*/
                      .attr("class", "dot")
+              /*Dot color based on whether there is an entry regarding doping use*/
+                     .style("fill", (data)=>{return data["Doping"]==""?dopingAbsentColor:dopingPresentColor})
 
               /*Append data as properties*/
                      .attr("data-xvalue", (data)=>rawYearVariable(data))
@@ -66,8 +72,7 @@ document.addEventListener("DOMContentLoaded", function(){
               /*Setting up tooltip in a way so it passes the freeCodeCamp tooltip test*/
                      .on("mouseover", (pelesEvent)=>{
 
-                            /*DEBUG*/
-                            console.log(Math.round(parseFloat(pelesEvent.target.attributes.getNamedItem("cy").nodeValue)));
+                            console.log(pelesEvent.target.attributes);
 
                             toolTip
                                    .transition()
@@ -80,7 +85,8 @@ document.addEventListener("DOMContentLoaded", function(){
                                    .style("margin-left", pelesEvent.layerX - 20 + "px")
                                    .style("Top",  Math.round(parseFloat(pelesEvent.target.attributes.getNamedItem("cy").nodeValue) - 50) + "px");
 
-                                   toolTip.attr("data-date", pelesEvent.target.__data__[0]);
+                            toolTip
+                                   .attr("data-year", pelesEvent.target.attributes.getNamedItem("data-xvalue").nodeValue);
                      })
                      .on("mouseout", (pelesEvent)=>{
                             toolTip
@@ -89,10 +95,62 @@ document.addEventListener("DOMContentLoaded", function(){
                                    .style("opacity", 0);
                      });
 
+              
+              const xAxis = d3.axisBottom(xScale);
+              const yAxis = d3.axisLeft(yScale);
+   
+              xAxis.ticks(10) /*X axis tick values set to show year*/
+              .tickFormat(year => {return year});
+
+              yAxis.ticks(10) /*X axis tick values set to show year*/
+              .tickFormat(time => {
+                     let minutes;
+                     let seconds;
+                     minutes = parseInt(time/60);
+                     seconds = time - minutes*60;
+                     return minutes + ":" + (seconds==0?"00":seconds)});
+      
+              svg.append("g")
+              .attr("transform", "translate(0," + (chartHeight - padding) + ")")
+              .attr("id", "x-axis")
+              .call(xAxis)
+              .selectAll("text")
+               .attr("transform", "translate(-20,10) rotate(-45)");
+               
+              svg.append("g")
+              .attr("transform","translate(" + padding + ",0)")
+              .attr("id", "y-axis")
+              .call(yAxis);
+
+              /*Center the bar chart according to screen size*/
+              d3.select("#scaterGraph")
+              .style("margin-left", (d)=>{
+                    if(pageWidth - chartWidth <=0) {
+                           return 0 + "px";
+                    };
+                    return (pageWidth - chartWidth)/2 + "px";
+             })
+             .style("max-width", chartWidth + "px")
+             .style("margin-top", "20px");
+
+             /*Add a legend*/
+             d3.select("#scaterGraph")
+              .append("div")
+              .attr("id", "legend")
+              .style("Top", chartHeight/2 + "px")
+              .style("Right", ((pageWidth - chartWidth)/2 + padding) + "px");
+
+             d3.select("#legend")
+              .append("div")
+              .text("Doping Used")
+              .append("div")
+              .text("Doping Not Used");
+
+
 
               /*DEBUG*/
               const testas = d3.min(jsonDATA, (data)=>data["Seconds"]);
-              console.log(rawTimeVariable(jsonDATA[6]));
+              console.log(rawTimeVariable(jsonDATA[0]));
 
 
        };

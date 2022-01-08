@@ -25,3 +25,7 @@
     border-radius: 5px;
     box-shadow: 0px 5px 10px rgba(44, 72, 173, 0.5);
 }
+#legend {
+    position: fixed;
+    background-color:honeydew;
+}
