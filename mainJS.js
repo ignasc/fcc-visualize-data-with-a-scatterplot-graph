@@ -22,6 +22,11 @@ document.addEventListener("DOMContentLoaded", function(){
               const rawYearVariable = (element)=>{return element["Year"]};
               const rawTimeVariable = (element)=>{return element["Seconds"]};
 
+              /*DEBUGING DATE OBJECT*
+              const dateObject = new Date(jsonDATA[0]["Year"],0,1,23,Math.floor(jsonDATA[0]["Seconds"]/60),jsonDATA[0]["Seconds"]-Math.floor(jsonDATA[0]["Seconds"]/60)*60,0);
+              console.log(jsonDATA[0]);
+              console.log("Date object: " + dateObject);*/
+
               /*Add chart title*/
               d3.select("#scaterGraph")
                  .append("h1")
@@ -66,13 +71,20 @@ document.addEventListener("DOMContentLoaded", function(){
 
               /*Append data as properties*/
                      .attr("data-xvalue", (data)=>rawYearVariable(data))
-                     .attr("data-yvalue", (data)=>data["Time"])
+                     /*using Date object for data-yvalues property*/
+                     /*Month,day,hour and milisecond are not needed, so hardcoded numbers to keep constant*/
+                     .attr("data-yvalue", (data)=>{
+                            let dateObject = new Date(data["Year"],0,1,23,Math.floor(data["Seconds"]/60),data["Seconds"]-Math.floor(data["Seconds"]/60)*60,0);
+                            return dateObject;
+                     })
                      .attr("data-name", (data)=>data["Name"])
                      
               /*Setting up tooltip in a way so it passes the freeCodeCamp tooltip test*/
                      .on("mouseover", (pelesEvent)=>{
 
-                            console.log(pelesEvent.target.attributes);
+                            let dateObject = new Date (pelesEvent.target.attributes.getNamedItem("data-yvalue").nodeValue);
+                            let minutes = dateObject.getMinutes();
+                            let seconds = dateObject.getSeconds();
 
                             toolTip
                                    .transition()
@@ -80,7 +92,7 @@ document.addEventListener("DOMContentLoaded", function(){
                                    .style("opacity", 0.9);
 
                             toolTip
-                                   .html("Name: " + pelesEvent.target.attributes.getNamedItem("data-name").nodeValue + "\nTime: " + pelesEvent.target.attributes.getNamedItem("data-yvalue").nodeValue)
+                                   .html("Name: " + pelesEvent.target.attributes.getNamedItem("data-name").nodeValue + "\nTime: " + minutes + ":" + (seconds<=9? "0"+seconds:seconds))
                                    /*tooltip positioning by getting data from mouseover event target*/
                                    .style("margin-left", pelesEvent.layerX - 20 + "px")
                                    .style("Top",  Math.round(parseFloat(pelesEvent.target.attributes.getNamedItem("cy").nodeValue) - 50) + "px");
